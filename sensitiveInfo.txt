@@ -1,0 +1,4 @@
+user: fillInAdminHere
+password: databasePW
+host: hostURL
+database: databaseName

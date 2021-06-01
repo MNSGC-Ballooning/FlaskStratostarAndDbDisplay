@@ -1,0 +1,5 @@
+div.ex1 { width: 100%; height: 90%; }
+.tableFixHead { overflow-y: auto; }
+.tableFixHead thead th { position: sticky; top: 0; }
+.center { margin: auto; }
+table { font-size: 15px; }

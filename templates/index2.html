@@ -1,0 +1,137 @@
+<html lang="en">
+<head>
+    <link rel = "stylesheet" href = "style.css">
+
+    <style>
+        div.ex1 { width: 100%; height: 90%; }
+        .tableFixHead { overflow-y: auto; }
+        .tableFixHead thead th { position: sticky; top: 0; }
+        .center { margin: auto; }
+        table { font-size: 15px; }
+    </style>
+    <title>UMN StratoStar API Display</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Include Bootstrap Styling -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+
+            var plotType = document.getElementById("mySelect").selectedIndex + 6;
+            var allPacketsLength = '{{allPacketsLength2}}';
+            var allPlotPackets = JSON.parse('{{allPlotPackets2|tojson}}');
+            var plotPacketLabels = JSON.parse('{{plotPacketLabels2|tojson}}');
+            var data = new google.visualization.DataTable()
+            
+            data.addColumn('datetime', 'Time of Day');
+            data.addColumn('number', plotPacketLabels[plotType]);
+        
+            for (var i = allPacketsLength-1; i >= 0; i--) {
+                data.addRow([new Date(allPlotPackets[i][0], allPlotPackets[i][1], allPlotPackets[i][2], allPlotPackets[i][3], allPlotPackets[i][4], allPlotPackets[i][5]), allPlotPackets[i][plotType]])
+            }
+
+            var options = {
+                title: plotPacketLabels[plotType] + ' vs Time',
+                pointsVisible: true,
+                pointSize : 4,
+                lineWidth: 0,
+                legend: 'none',
+                theme: 'pretty',
+                vAxis: { title: plotPacketLabels[plotType] },
+                hAxis: { format: 'h:mm' }
+            };
+
+            var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+            chart.draw(data, options);
+        }
+
+        function goToNewPage(){
+
+            var url = document.getElementById('list').value;
+            if(url != 'none') {
+                window.location = url;
+            }
+        }
+
+    </script>
+
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+        <!-- Brand -->
+        <a class="navbar-brand" href="/"></a>
+      
+        <!-- Links -->
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Stratostar SatCom</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/radio">UMN Radio Comms</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/rangeFinder">Range Finder</a>
+          </li>
+        </ul>
+    </nav>  
+
+    <div style= "margin: 3px">
+        <form>
+            Select Plot Variable:
+            <select id="mySelect" onchange = "drawChart()">
+                {% for x in range(6,plotPacketLabels2|length) %}
+                    <option> {{plotPacketLabels2[x]}} </option>
+                {% endfor %} 
+            </select>
+        </form>
+    </div>
+
+    <div style= "margin-left: 5px"></div>
+        <form>
+            Choose Packet Quantity Plotted
+            <select name="list" id="list" accesskey="target" onchange="goToNewPage()">
+                <option value="\radio25"> 25 </option>
+                <option value="\radio50"> 50 </option>
+                <option value="\radio100"> 100 </option>
+                <option value="\radio250"> 250 </option>
+                <option value="\radio500"> 500 </option>
+            </select>
+        </form>
+    </div>
+
+    <div id="curve_chart" class = "center" style="width: 100%; border-style: solid; border-color: white; max-width: 900px; height: calc(100vh - 50%)"></div>
+
+    <div class = "table-responsive tableFixHead">
+        <table class = "table table-striped table-condensed"> <!-- Begin table with striped styling -->
+            <!-- Create Table head with column labels -->
+            <thead>
+                <tr>
+                    {% for x in range(packetLabels2|length) %}
+                        <th>{{packetLabels2[x]}}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <!-- Create main body of table -->
+            <tbody>
+                {% for y in range(allPacketsLength2) %} <!-- Begin Loop for writing each table row -->           
+                    <tr> <!-- Pass values from flask (application.py) to html for listing in the table -->
+                        {% for z in range(packetLabels2|length) %}
+                            <td>{{allPackets2[y][z]}}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
